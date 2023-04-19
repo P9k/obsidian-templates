@@ -1,0 +1,53 @@
+<%*
+  let title = tp.file.title;
+  datetime = tp.date.now("YYYYMMDDHHmm");
+  
+  if (title.startsWith("Unbenannt")) {
+    title = await tp.system.prompt("Technical Note Title","");
+    referencetype = await tp.system.suggester(["Paper", "Project", "Proposal", "Other"],["Paper", "Project", "Proposal", "Other"]);
+
+    if (title == "") {
+      await tp.file.rename(datetime);
+    }
+    
+    else {
+      await tp.file.rename(datetime + "_" + title);
+    }
+       
+  }
+   
+  if (referencetype == "Other") {
+    referencetype = "other_ref";
+  }
+-%>
+---
+title: <% title %>
+created: <% tp.date.now("YYYY-MM-DD") %>
+<% referencetype.toLowerCase() %>: 
+<%-* 
+   if (referencetype != "other_ref") {
+     folders = this.app.vault.getAllLoadedFiles().filter(i => i.children).map(folder => folder.path);
+     folder = await tp.system.suggester(folders, folders);
+     referencenote = (await tp.system.suggester((item) => item.basename, app.vault.getMarkdownFiles().filter(file => file.path.substr(0, file.path.lastIndexOf("/")) ==  folder))).basename;
+     tR += "[" + referencenote + "]";
+   }
+   
+   else { }
+%>
+tags: technical_note
+---
+<% tp.file.cursor() %>
+
+---
+> [!abstract] Reference Note
+> 
+<%-* 
+   if (referencetype != "other_ref") {
+     tR += "[[" + referencenote + "]]";
+   }
+   
+   else { 
+     tR += "[[Unlinked Technical Note]]";
+   }
+%>
+
