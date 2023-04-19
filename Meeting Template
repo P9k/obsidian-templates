@@ -1,0 +1,81 @@
+<%*
+  let title = tp.file.title;
+  datetime = tp.date.now("YYYYMMDDHHmm");
+  
+  if (title.startsWith("Unbenannt")) {
+    meetingtype = await tp.system.suggester(["Type 1", "Type 2", "Other"],["Type 1", "Type 2", "Other"]);
+
+    if (meetingtype != "Other"){
+      title = await tp.system.prompt("Meeting Note Title",meetingtype + "-Meeting");
+    }
+
+    else {
+      title = await tp.system.prompt("Meeting Note Title","");
+    }
+    
+    if (title == "") {
+      await tp.file.rename(datetime);
+    }
+    
+    else {
+      await tp.file.rename(datetime + "_" + title);
+    }
+    
+    referencetype = await tp.system.suggester(["Paper", "Project", "Proposal", "Other"],["Paper", "Project", "Proposal", "Other"]);
+
+    if (meetingtype == "WTN Theory") {
+      attendeestring = await tp.system.prompt("Attendees","Person 1 and Person 2");
+      attendeelist = attendeestring.split(" and ");
+    }
+    else {
+      attendeestring = await tp.system.prompt("Attendees","");
+      attendeelist = attendeestring.split(" and ");
+    }
+
+    
+
+  }
+
+  attendeelist = attendeestring.split(" and ");
+
+  if (referencetype == "Other") {
+    referencetype = "other_ref";
+  }
+  
+-%>
+---
+title: <% title %>
+created: <% tp.date.now("YYYY-MM-DD") %>
+<% referencetype.toLowerCase() %>: 
+<%-* 
+   if (referencetype != "other_ref") {
+     folders = this.app.vault.getAllLoadedFiles().filter(i => i.children).map(folder => folder.path);
+     folder = await tp.system.suggester(folders, folders);
+     referencenote = (await tp.system.suggester((item) => item.basename, app.vault.getMarkdownFiles().filter(file => file.path.substr(0, file.path.lastIndexOf("/")) ==  folder))).basename;
+     tR += "[" + referencenote + "]";
+   }
+   
+   else { }
+%>
+tags: meeting/<% meetingtype.toLowerCase() %>
+---
+attendees: <%* attendeelist.forEach(element => tR += "[[" + element + "]], "); tR += "[[Myself]]" %>
+
+### Summary
+<% tp.file.cursor() %>
+
+### Notes/Tasks
+
+---
+> [!abstract] Reference Note
+> 
+<%-* 
+   if (referencetype != "other_ref") {
+     tR += "[[" + referencenote + "]]";
+   }
+   
+   else { 
+     tR += "[[Unlinked Meeting Note]]";
+   }
+%>
+
