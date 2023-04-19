@@ -1,0 +1,56 @@
+<%*
+  let title = tp.file.title
+  
+  if (title.startsWith("Unbenannt")) {
+    title = await tp.system.prompt("Project Title","Title of project");
+    await tp.file.rename(title)
+  }
+
+-%>
+
+---
+project:  [<% title %>]
+startingdate: <% tp.date.now("YYYY-MM-DD")%>
+enddate: <% tp.date.now("YYYY-MM-DD")%>
+
+topics: 
+type: 
+
+status: <% await  tp.system.suggester(["Open", "Planning", "Generating Data", "Dissemination", "Publication", "Finished"],["Open", "Planning", "Generating Data", "Dissemination", "Publication", "Finished"])%>
+active: true
+dodineedtodosomething: false
+
+tags: Project
+---
+collaborators: 
+
+# <% title %>
+<% tp.file.cursor() %>
+
+### Technical Notes
+```dataview
+TABLE without id 
+created as Date,
+link(file.link, title) as Note
+
+FROM #technical_note 
+WHERE contains(project, "<% title %>")
+
+SORT created DESC
+```
+
+### Meetings
+```dataview
+TABLE without id 
+created as Date,
+link(file.link, title) as Note
+
+FROM #meeting
+WHERE contains(project, "<% title %>")
+
+SORT created DESC
+```
+
+---
+> [!example] Local Directory
+> [Directory](<file:////home/USER/FILL-ME-IN>)
